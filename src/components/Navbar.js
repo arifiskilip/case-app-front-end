@@ -1,57 +1,70 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../interceptors/axiosInstance ";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const [user, setUser] = useState(null); // Başlangıçta kullanıcı bilgisi null olabilir
+
+  const getUser = async () => {
+    try {
+      const userResponse = await axiosInstance.get("/User/GetUserByAuthenticated");
+      setUser(userResponse.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/login");
   };
 
   return (
-    <nav class="navbar navbar-dark navbar-expand-sm bg-dark fixed-top">
-        <div class="container">
-        <a href="/" class="navbar-brand">
-        <i class="fas fa-blog"></i> &nbsp;
-        Blog Template
+    <nav className="navbar navbar-dark navbar-expand-sm bg-dark fixed-top">
+      <div className="container">
+        <a href="/" className="navbar-brand">
+          <i className="fas fa-blog"></i> &nbsp; Case App
         </a>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
-            <span class="navbar-toggler-icon"></span>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarCollapse"
+        >
+          <span className="navbar-toggler-icon"></span>
         </button>
 
-
-        <div id="navbarCollapse" class="collapse navbar-collapse">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a href="" class="nav-link active">
-                    Home
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="" class="nav-link active">
-                    Blog
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="" class="nav-link active">
-                    About
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="" class="nav-link active">
-                    Contact
-                </a>
-            </li>
-        </ul>
+        <div id="navbarCollapse" className="collapse navbar-collapse">
+          <ul className="navbar-nav ms-auto">
+            {user && (
+              <>
+                <li className="nav-item mx-2">
+                  <button className="btn btn-success nav-link">
+                    {user !==null}{
+                        user.firstName + " " + user.lastName
+                    }
+                  </button>
+                </li>
+                <li className="nav-item mx-2">
+                  <button
+                    onClick={() => handleLogout()}
+                    className="btn btn-danger nav-link"
+                  >
+                    Çıkış Yap
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>
         </div>
-
-
-
-    </div>
+      </div>
     </nav>
   );
 };
